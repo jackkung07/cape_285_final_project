@@ -26,4 +26,23 @@ def user_registration_web(request):
 
 @login_required()
 def home_page(request):
-    return render(request, 'portfolio/home.html', {'backend_data': None})
+    if request.method == 'POST':
+        allotment = int(str(request.POST['allotment']))
+        ethical_investment = False
+        growth_investment = False
+        index_investment = False
+        quality_investment = False
+        value_investment = False
+        if 'ethical' in request.POST.keys():
+            ethical_investment = True
+        if 'growth' in request.POST.keys():
+            growth_investment = True
+        if 'index' in request.POST.keys():
+            index_investment = True
+        if 'quality' in request.POST.keys():
+            quality_investment = True
+        if 'value' in request.POST.keys():
+            value_investment = True
+
+        return render(request, 'portfolio/home.html', {'portfolio_data': None})
+    return render(request, 'portfolio/home.html')

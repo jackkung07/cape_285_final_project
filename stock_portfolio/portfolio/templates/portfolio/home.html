@@ -53,15 +53,84 @@
 
         <div class="content">
             <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card ">
-                            <div class="header"></div>
+                <form method="post" name="investment" action="/portfolio" onsubmit="return checkform()">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card ">
+                                <div class="header"></div>
+                                <div class="content">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <b>Allotment:</b>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="number" id="allotment" name="allotment" value="1000">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p></p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <b>Strategies:</b>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="checkbox" id="ethical" name="ethical"
+                                                   onclick="return keepCount()">
+                                            Ethical Investing
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="checkbox" id="growth" name="growth"
+                                                   onclick="return keepCount()">
+                                            Growth Investing
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="checkbox" id="index" name="index" onclick="return keepCount()">
+                                            Index Investing
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="checkbox" id="quality" name="quality"
+                                                   onclick="return keepCount()">
+                                            Quality Investing
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="checkbox" id="value" name="value" onclick="return keepCount()">
+                                            Value Investing
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p></p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input type="submit">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                </div>
-
+                </form>
             </div>
 
         </div>
@@ -70,8 +139,60 @@
 </div>
 
 </body>
-{% include "portfolio/includes/requiredscripts.html" %}<input type="hidden" id="templateData" value="{{ backend_data.datas }}">
+{% include "portfolio/includes/requiredscripts.html" %}
+<script language="javascript">
+    function checkform() {
+        var newCount = 0;
+        var allotment = document.investment.allotment.value;
 
+        if (document.investment.ethical.checked) {
+            newCount = newCount + 1
+        }
+
+        if (document.investment.growth.checked) {
+            newCount = newCount + 1
+        }
+
+        if (document.investment.index.checked) {
+            newCount = newCount + 1
+        }
+
+        if (document.investment.quality.checked) {
+            newCount = newCount + 1
+        }
+
+        if (document.investment.value.checked) {
+            newCount = newCount + 1
+        }
+        debugger;
+        if (newCount <= 0 || newCount >= 3) {
+            bootbox.dialog({
+                title: "Error",
+                message: "Please pick one or two investment strategies",
+                buttons: {
+                    "Close": {
+                        label: "Close",
+                        className: "btn btn-primary"
+                    }
+                }
+            });
+            document.investment;
+            return false;
+        } else if (allotment <= 0) {
+            bootbox.dialog({
+                title: "Error",
+                message: "Please input a positive number in allotment field",
+                buttons: {
+                    "Close": {
+                        label: "Close",
+                        className: "btn btn-primary"
+                    }
+                }
+            });
+            return false;
+        }
+    }
+</script>
 
 
 {% endblock %}
