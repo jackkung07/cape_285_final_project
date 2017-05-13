@@ -32,12 +32,7 @@ def home_page(request):
     ethlst = list()
     idxlst = list()
     pdlist = list()
-    APPL = Share('APPL')
-    ADBE = Share('ADBE')
-    NSRGY = Share('NSRGY')
-    VTI = Share('VTI')
-    IXUS = Share('IXUS')
-    ILTB = Share('ILTB')
+
 
 #random list
     MMM = Share('MMM')
@@ -90,28 +85,59 @@ def home_page(request):
         quality_investment = False
         value_investment = False
         if 'ethical' in request.POST.keys():
-            data = {}
-            data['sticker'] = 'ADBE'
-            data['name'] = adobe.get_name()
-            data['price'] = adobe.get_price()
-            rstlist.append(data)
-            data['sticker'] = 'APPL'
-            data['name'] = apple.get_name()
-            data['price'] = apple.get_price()
-            rstlist.append(data)
+            aapl_f = 0
+            AAPL = Share('AAPL')
+            aapl_f = float(str(AAPL.get_percent_change_from_year_low())[0:-1]) + \
+                     float(str(AAPL.get_percent_change_from_200_day_moving_average())[0:-1]) + \
+                     float(str(AAPL.get_percent_change_from_50_day_moving_average())[0:-1]) - \
+                     float(str(AAPL.get_percent_change_from_year_high())[0:-1])
+
+            adbe_f = 0
+            ADBE = Share('ADBE')
+            adbe_f = float(str(ADBE.get_percent_change_from_year_low())[0:-1]) + \
+                     float(str(ADBE.get_percent_change_from_200_day_moving_average())[0:-1]) + \
+                     float(str(ADBE.get_percent_change_from_50_day_moving_average())[0:-1]) - \
+                     float(str(ADBE.get_percent_change_from_year_high())[0:-1])
+
+            nsrgy_f = 0
+            NSRGY = Share('NSRGY')
+            nsrgy_f = float(str(NSRGY.get_percent_change_from_year_low())[0:-1]) + \
+                      float(str(NSRGY.get_percent_change_from_200_day_moving_average())[0:-1]) + \
+                      float(str(NSRGY.get_percent_change_from_50_day_moving_average())[0:-1]) - \
+                      float(str(NSRGY.get_percent_change_from_year_high())[0:-1])
+
+            total_f = aapl_f + adbe_f + nsrgy_f
+            aapl_pct = aapl_f/float(total_f)
+            adbe_pct = adbe_f/float(total_f)
+            nsrgy_pct = nsrgy_f/float(total_f)
+            aaplD = {"sticker":"AAPL","name":AAPL.get_name(),"aloc_pct":str(aapl_pct),"aloc_amt":str(allotment*aapl_pct)}
+            adbeD = {"sticker":"ADBE","name":ADBE.get_name(),"aloc_pct":str(adbe_pct),"aloc_amt":str(allotment*adbe_pct)}
+            nsrgyD = {"sticker":"NSRGY","name":NSRGY.get_name(),"aloc_pct":str(nsrgy_pct),"aloc_amt":str(allotment*nsrgy_pct)}
+            rstlist.append(aaplD)
+            rstlist.append(adbeD)
+            rstlist.append(nsrgyD)
+
+
             ethical_investment = True
 
         if 'growth' in request.POST.keys():
             growth_investment = True
         if 'index' in request.POST.keys():
-            rstlist.append(vti.get_name())
-            rstlist.append(iltb.get_name())
-            rstlist.append(ixus.get_name())
+            VTI = Share('VTI')
+            IXUS = Share('IXUS')
+            ILTB = Share('ILTB')
+
+
+
+    #        rstlist.append(vtlD)
+    #        rstlist.append(ixusD)
+    #        rstlist.append(iltbD)
+
             index_investment = True
         if 'quality' in request.POST.keys():
             quality_investment = True
         if 'value' in request.POST.keys():
             value_investment = True
 
-        return render(request, 'portfolio/test_ivan.html', {'result': json.dumps(rstlist)})
+        return render(request, 'portfolio/home.html', {'result': json.dumps(rstlist)})
     return render(request, 'portfolio/home.html')
