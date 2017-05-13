@@ -1,0 +1,77 @@
+{% extends "portfolio/base.html" %}
+{% load static %}
+{% block content %}
+
+<body>
+
+<div class="wrapper">
+    <div class="sidebar" data-color="purple" data-image="{% static 'portfolio/img/sidebar-5.jpg' %}">
+
+        <!--
+
+            Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
+            Tip 2: you can also add an image using data-image tag
+
+        -->
+
+        <div class="sidebar-wrapper">
+            <div class="logo">
+                <a class="simple-text">
+                    Stock Portfolio
+                </a>
+            </div>
+
+            <ul class="nav">
+                <li class="active">
+                    <a href="#">
+                        <i class="pe-7s-monitor"></i>
+                        <p>Finance Analysis Engine</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-panel">
+        <nav class="navbar navbar-default navbar-fixed">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand">Stock Portfolio</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="/portfolio/logout">
+                                Log out
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card ">
+                            <div class="header"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        {% include "portfolio/includes/footer.html" %}
+    </div>
+</div>
+
+</body>
+{% include "portfolio/includes/requiredscripts.html" %}<input type="hidden" id="templateData" value="{{ backend_data.datas }}">
+
+
+
+{% endblock %}
