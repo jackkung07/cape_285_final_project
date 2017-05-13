@@ -83,34 +83,31 @@
 
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="checkbox" id="ethical" name="ethical"
-                                                   onclick="return keepCount()">
+                                            <input type="checkbox" id="ethical" name="ethical">
                                             Ethical Investing
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="checkbox" id="growth" name="growth"
-                                                   onclick="return keepCount()">
+                                            <input type="checkbox" id="growth" name="growth">
                                             Growth Investing
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="checkbox" id="index" name="index" onclick="return keepCount()">
+                                            <input type="checkbox" id="index" name="index">
                                             Index Investing
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="checkbox" id="quality" name="quality"
-                                                   onclick="return keepCount()">
+                                            <input type="checkbox" id="quality" name="quality">
                                             Quality Investing
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="checkbox" id="value" name="value" onclick="return keepCount()">
+                                            <input type="checkbox" id="value" name="value">
                                             Value Investing
                                         </div>
                                     </div>
@@ -137,7 +134,7 @@
         {% include "portfolio/includes/footer.html" %}
     </div>
 </div>
-
+<input type="hidden" id="resultData" value="{{ result }}">
 </body>
 {% include "portfolio/includes/requiredscripts.html" %}
 <script language="javascript">
@@ -164,7 +161,6 @@
         if (document.investment.value.checked) {
             newCount = newCount + 1
         }
-        debugger;
         if (newCount <= 0 || newCount >= 3) {
             bootbox.dialog({
                 title: "Error",

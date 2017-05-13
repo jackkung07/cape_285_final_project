@@ -7,6 +7,7 @@ from .models import UserCreationForm
 from yahoo_finance import Share
 from django.http import JsonResponse
 from django.http.response import HttpResponse
+import json
 
 # Create your views here.
 @csrf_exempt
@@ -67,5 +68,5 @@ def home_page(request):
         if 'value' in request.POST.keys():
             value_investment = True
 
-        return render(request, 'portfolio/home.html', {'result': rstlist})
+        return render(request, 'portfolio/result.html', {'result': json.dumps(rstlist)})
     return render(request, 'portfolio/home.html')
