@@ -28,9 +28,12 @@ def user_registration_web(request):
         'form': form,
     })
 
-
 @login_required()
 def home_page(request):
+    return render(request, 'portfolio/home.html')
+
+@login_required()
+def result_page(request):
     rstlist = list()
     grow_sortlst = list()
     value_sortlst = list()
@@ -48,7 +51,7 @@ def home_page(request):
         for key in request.POST.keys():
             if key in ['ethical','growth','index','quality']:
                 iv_type = iv_type + 1
-        print "current selected types count = " + str(iv_type)
+        print("current selected types count = " + str(iv_type))
         if iv_type == 2:
             allotment = allotment/float(2)
 
@@ -214,6 +217,6 @@ def home_page(request):
                 else:
                     day_pro[i][hist_info[i]["Date"]] = float(day_pro[i][hist_info[i]["Date"]]) + float(hist_info[i]["Close"])*int(float(item["aloc_amt"])/float(hist_info[i]["Open"])) + float(item["aloc_amt"])%float(hist_info[i]["Open"])
         rstlist.append({"sticker":"portfolio","history":day_pro})
-        print json.dumps(rstlist)
-        return render(request, 'portfolio/home.html', {'result': json.dumps(rstlist)})
+        print(json.dumps(rstlist))
+        return render(request, 'portfolio/result.html', {'result': json.dumps(rstlist)})
     return render(request, 'portfolio/home.html')
