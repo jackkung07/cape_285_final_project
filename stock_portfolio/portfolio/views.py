@@ -7,6 +7,7 @@ from .models import UserCreationForm
 from yahoo_finance import Share
 import time
 import heapq
+from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.http.response import HttpResponse
 import json
@@ -42,6 +43,7 @@ def home_page(request):
 
     if request.method == 'POST':
         allotment = int(str(request.POST['allotment']))
+        ori_allotment = allotment
         iv_type = 0
         for key in request.POST.keys():
             if key in ['ethical','growth','index','quality']:
@@ -65,7 +67,9 @@ def home_page(request):
             nsrgy_f = float(str(NSRGY.get_percent_change_from_year_low())[0:-1]) + \
                       float(str(NSRGY.get_percent_change_from_50_day_moving_average())[0:-1]) - \
                       float(str(NSRGY.get_percent_change_from_year_high())[0:-1])
-
+            stckdict['AAPL'] = AAPL
+            stckdict['ADBE'] = ADBE
+            stckdict['NSRGY'] = NSRGY
             total_f = (aapl_f + adbe_f + nsrgy_f)*iv_type
             aapl_pct = aapl_f/float(total_f)
             adbe_pct = adbe_f/float(total_f)
@@ -77,9 +81,6 @@ def home_page(request):
             rstlist.append(adbeD)
             rstlist.append(nsrgyD)
 
-
-            ethical_investment = True
-
         if 'growth' in request.POST.keys():
             for stock in grow_stcklist:
                 while True:
@@ -89,6 +90,7 @@ def home_page(request):
                         time.sleep(0.1)
                         continue
                     break
+                stckdict[stock]=detail
                 heapq.heappush(grow_sortlst, (float(str(detail.get_percent_change_from_year_low())[0:-1]) +
                                               float(
                                                   str(detail.get_percent_change_from_200_day_moving_average())[0:-1]) +
@@ -121,7 +123,9 @@ def home_page(request):
             iltb_f = float(str(ILTB.get_percent_change_from_year_low())[0:-1]) + \
                       float(str(ILTB.get_percent_change_from_200_day_moving_average())[0:-1]) - \
                       float(str(ILTB.get_percent_change_from_year_high())[0:-1])
-
+            stckdict['VTI'] = VTI
+            stckdict['IXUS'] = IXUS
+            stckdict['ILTB'] = ILTB
             total_f = (vti_f + ixus_f + iltb_f)*iv_type
             vti_pct = vti_f / float(total_f)
             ixus_pct = ixus_f / float(total_f)
@@ -148,6 +152,7 @@ def home_page(request):
                         time.sleep(0.1)
                         continue
                     break
+                stckdict[stock] = detail
                 heapq.heappush(quality_sortlst, (
                     float(detail.get_price_earnings_ratio() if detail.get_price_earnings_ratio() != None else 0) +
                     float(
@@ -178,6 +183,7 @@ def home_page(request):
                         time.sleep(0.1)
                         continue
                     break
+                stckdict[stock] = detail
                 heapq.heappush(value_sortlst,
                                (float(detail.get_dividend_yield() if detail.get_dividend_yield() != None else 0) +
                                 float(
@@ -195,6 +201,19 @@ def home_page(request):
                 rstlist.append({"sticker": item[1], "name": item[2].get_name(), "aloc_pct": str(item_pct),
                                 "aloc_amt": str(item_amt), "price": str(item[2].get_price()),
                                 "exchange": str(item[2].get_stock_exchange())})
+        days_cnt = 15
+        str_date =  str((datetime.now() - timedelta(days=days_cnt)).date().isoformat())
+        end_date = str(datetime.today().date().isoformat())
+        day_pro = list()
+        remaining = 0
+        for item in rstlist:
+            hist_info = stckdict[item["sticker"]].get_historical(str_date,end_date)
+            for i in range(0,6):
+                if len(day_pro)<=i:
+                    day_pro.append({hist_info[i]["Date"]:float(hist_info[i]["Close"])*int(float(item["aloc_amt"])/float(hist_info[i]["Open"]))+float(item["aloc_amt"])%float(hist_info[i]["Open"])})
+                else:
+                    day_pro[i][hist_info[i]["Date"]] = float(day_pro[i][hist_info[i]["Date"]]) + float(hist_info[i]["Close"])*int(float(item["aloc_amt"])/float(hist_info[i]["Open"])) + float(item["aloc_amt"])%float(hist_info[i]["Open"])
+        rstlist.append({"sticker":"portfolio","history":day_pro})
         print json.dumps(rstlist)
         return render(request, 'portfolio/home.html', {'result': json.dumps(rstlist)})
     return render(request, 'portfolio/home.html')
