@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from .models import UserCreationForm
 from yahoo_finance import Share
+import time
+import heapq
 from django.http import JsonResponse
 from django.http.response import HttpResponse
 import json
@@ -29,90 +31,48 @@ def user_registration_web(request):
 @login_required()
 def home_page(request):
     rstlist = list()
-    ethlst = list()
-    idxlst = list()
-    pdlist = list()
+    grow_sortlst = list()
+    value_sortlst = list()
+    quality_sortlst = list()
 
-
-#random list
-    MMM = Share('MMM')
-    pdlist.append({"sticker": "MMM", "detail": MMM})
-    ABT = Share('ABT')
-    pdlist.append({"sticker": "ABT", "detail": ABT})
-    ABBV = Share('ABBV')
-    pdlist.append({"sticker": "ABBV", "detail": ABBV})
-    ACN = Share('ACN')
-    pdlist.append({"sticker": "ACN", "detail": ACN})
-    ATVI = Share('ATVI')
-    pdlist.append({"sticker": "ATVI", "detail": ATVI})
-    AYI = Share('AYI')
-    pdlist.append({"sticker": "AYI", "detail": AYI})
-    AMD = Share('AMD')
-    pdlist.append({"sticker": "AMD", "detail": AMD})
-    AAP = Share('AAP')
-    pdlist.append({"sticker": "AAP", "detail": AAP})
-    AES = Share('AES')
-    pdlist.append({"sticker": "AES", "detail": AES})
-    AET = Share('AET')
-    pdlist.append({"sticker": "AET", "detail": AET})
-    AMG = Share('AMG')
-    pdlist.append({"sticker": "AMG", "detail": AMG})
-    AFL = Share('AFL')
-    pdlist.append({"sticker": "AFL", "detail": AFL})
-    APD = Share('APD')
-    pdlist.append({"sticker": "APD", "detail": APD})
-    AKAM = Share('AKAM')
-    pdlist.append({"sticker": "AKAM", "detail": AKAM})
-    ALB = Share('ALB')
-    pdlist.append({"sticker": "ALB", "detail": ALB})
-    ARE = Share('ARE')
-    pdlist.append({"sticker": "ARE", "detail": ARE})
-    AGN = Share('AGN')
-    pdlist.append({"sticker": "AGN", "detail": AGN})
-    LNT = Share('LNT')
-    pdlist.append({"sticker": "LNT", "detail": LNT})
-    ALXN = Share('ALXN')
-    pdlist.append({"sticker": "ALXN", "detail": ALXN})
-    GOOGL = Share('GOOGL')
-    pdlist.append({"sticker": "GOOGL", "detail": GOOGL})
-
+    grow_stcklist = [ 'PNW','RL','PPG','ACN', 'ATVI', 'AYI', 'AMD', 'LNT', 'ALXN', 'GOOGL']
+    value_stcklist = ['AMG', 'AFL', 'APD', 'AKAM','PCG','PM','PSX', 'AAP', 'AES', 'AET']
+    quality_stcklist = ['MMM', 'ABT', 'ABBV','PEP','PKI','PRGO','PFE', 'ALB', 'ECL', 'AGN']
+    stckdict = dict()
 
     if request.method == 'POST':
         allotment = int(str(request.POST['allotment']))
-        ethical_investment = False
-        growth_investment = False
-        index_investment = False
-        quality_investment = False
-        value_investment = False
+        iv_type = 0
+        for key in request.POST.keys():
+            if key in ['ethical','growth','index','quality']:
+                iv_type = iv_type + 1
+        print "current selected types count = " + str(iv_type)
+        if iv_type == 2:
+            allotment = allotment/float(2)
+
         if 'ethical' in request.POST.keys():
-            aapl_f = 0
             AAPL = Share('AAPL')
             aapl_f = float(str(AAPL.get_percent_change_from_year_low())[0:-1]) + \
-                     float(str(AAPL.get_percent_change_from_200_day_moving_average())[0:-1]) + \
                      float(str(AAPL.get_percent_change_from_50_day_moving_average())[0:-1]) - \
                      float(str(AAPL.get_percent_change_from_year_high())[0:-1])
 
-            adbe_f = 0
             ADBE = Share('ADBE')
             adbe_f = float(str(ADBE.get_percent_change_from_year_low())[0:-1]) + \
-                     float(str(ADBE.get_percent_change_from_200_day_moving_average())[0:-1]) + \
                      float(str(ADBE.get_percent_change_from_50_day_moving_average())[0:-1]) - \
                      float(str(ADBE.get_percent_change_from_year_high())[0:-1])
 
-            nsrgy_f = 0
             NSRGY = Share('NSRGY')
             nsrgy_f = float(str(NSRGY.get_percent_change_from_year_low())[0:-1]) + \
-                      float(str(NSRGY.get_percent_change_from_200_day_moving_average())[0:-1]) + \
                       float(str(NSRGY.get_percent_change_from_50_day_moving_average())[0:-1]) - \
                       float(str(NSRGY.get_percent_change_from_year_high())[0:-1])
 
-            total_f = aapl_f + adbe_f + nsrgy_f
+            total_f = (aapl_f + adbe_f + nsrgy_f)*iv_type
             aapl_pct = aapl_f/float(total_f)
             adbe_pct = adbe_f/float(total_f)
             nsrgy_pct = nsrgy_f/float(total_f)
-            aaplD = {"sticker":"AAPL","name":AAPL.get_name(),"aloc_pct":str(aapl_pct),"aloc_amt":str(allotment*aapl_pct)}
-            adbeD = {"sticker":"ADBE","name":ADBE.get_name(),"aloc_pct":str(adbe_pct),"aloc_amt":str(allotment*adbe_pct)}
-            nsrgyD = {"sticker":"NSRGY","name":NSRGY.get_name(),"aloc_pct":str(nsrgy_pct),"aloc_amt":str(allotment*nsrgy_pct)}
+            aaplD = {"sticker":"AAPL","name":AAPL.get_name(),"aloc_pct":str(aapl_pct),"aloc_amt":str(allotment*aapl_pct),"price":str(AAPL.get_price()),"exchange":str(AAPL.get_stock_exchange())}
+            adbeD = {"sticker":"ADBE","name":ADBE.get_name(),"aloc_pct":str(adbe_pct),"aloc_amt":str(allotment*adbe_pct),"price":str(ADBE.get_price()),"exchange":str(ADBE.get_stock_exchange())}
+            nsrgyD = {"sticker":"NSRGY","name":NSRGY.get_name(),"aloc_pct":str(nsrgy_pct),"aloc_amt":str(allotment*nsrgy_pct),"price":str(NSRGY.get_price()),"exchange":str(NSRGY.get_stock_exchange())}
             rstlist.append(aaplD)
             rstlist.append(adbeD)
             rstlist.append(nsrgyD)
@@ -121,23 +81,120 @@ def home_page(request):
             ethical_investment = True
 
         if 'growth' in request.POST.keys():
-            growth_investment = True
+            for stock in grow_stcklist:
+                while True:
+                    try:
+                        detail = Share(stock)
+                    except:
+                        time.sleep(0.1)
+                        continue
+                    break
+                heapq.heappush(grow_sortlst, (float(str(detail.get_percent_change_from_year_low())[0:-1]) +
+                                              float(
+                                                  str(detail.get_percent_change_from_200_day_moving_average())[0:-1]) +
+                                              float(str(detail.get_percent_change_from_50_day_moving_average())[0:-1]) +
+                                              float(str(detail.get_percent_change_from_year_high())[0:-1]), stock,
+                                              detail))
+                if len(grow_sortlst) > 3:
+                    heapq.heappop(grow_sortlst)
+            total_f = 0
+            for item in grow_sortlst:
+                total_f = total_f + item[0]
+            for item in grow_sortlst:
+                item_pct = item[0]/float(total_f*iv_type)
+                item_amt = allotment*item_pct
+                rstlist.append({"sticker":item[1],"name":item[2].get_name(),"aloc_pct":str(item_pct),"aloc_amt":str(item_amt),"price":str(item[2].get_price()),"exchange":str(item[2].get_stock_exchange())})
+
         if 'index' in request.POST.keys():
+
             VTI = Share('VTI')
+            vti_f = float(str(VTI.get_percent_change_from_year_low())[0:-1]) + \
+                     float(str(VTI.get_percent_change_from_200_day_moving_average())[0:-1]) - \
+                     float(str(VTI.get_percent_change_from_year_high())[0:-1])
+
             IXUS = Share('IXUS')
+            ixus_f = float(str(IXUS.get_percent_change_from_year_low())[0:-1]) + \
+                     float(str(IXUS.get_percent_change_from_200_day_moving_average())[0:-1]) - \
+                     float(str(IXUS.get_percent_change_from_year_high())[0:-1])
+
             ILTB = Share('ILTB')
+            iltb_f = float(str(ILTB.get_percent_change_from_year_low())[0:-1]) + \
+                      float(str(ILTB.get_percent_change_from_200_day_moving_average())[0:-1]) - \
+                      float(str(ILTB.get_percent_change_from_year_high())[0:-1])
 
+            total_f = (vti_f + ixus_f + iltb_f)*iv_type
+            vti_pct = vti_f / float(total_f)
+            ixus_pct = ixus_f / float(total_f)
+            iltb_pct = iltb_f / float(total_f)
+            vtiD = {"sticker": "VTI", "name": VTI.get_name(), "aloc_pct": str(vti_pct),
+                     "aloc_amt": str(allotment * vti_pct), "price": str(VTI.get_price()),
+                     "exchange": str(VTI.get_stock_exchange())}
+            ixusD = {"sticker": "IXUS", "name": IXUS.get_name(), "aloc_pct": str(ixus_pct),
+                     "aloc_amt": str(allotment * ixus_pct), "price": str(IXUS.get_price()),
+                     "exchange": str(IXUS.get_stock_exchange())}
+            iltbD = {"sticker": "ILTB", "name": ILTB.get_name(), "aloc_pct": str(iltb_pct),
+                      "aloc_amt": str(allotment * iltb_pct), "price": str(ILTB.get_price()),
+                      "exchange": str(ILTB.get_stock_exchange())}
+            rstlist.append(vtiD)
+            rstlist.append(ixusD)
+            rstlist.append(iltbD)
 
-
-    #        rstlist.append(vtlD)
-    #        rstlist.append(ixusD)
-    #        rstlist.append(iltbD)
-
-            index_investment = True
         if 'quality' in request.POST.keys():
-            quality_investment = True
-        if 'value' in request.POST.keys():
-            value_investment = True
+            for stock in quality_stcklist:
+                while True:
+                    try:
+                        detail = Share(stock)
+                    except:
+                        time.sleep(0.1)
+                        continue
+                    break
+                heapq.heappush(quality_sortlst, (
+                    float(detail.get_price_earnings_ratio() if detail.get_price_earnings_ratio() != None else 0) +
+                    float(
+                        detail.get_price_earnings_growth_ratio() if detail.get_price_earnings_growth_ratio() != None else 0) +
+                    float(
+                        detail.get_change_from_200_day_moving_average() if detail.get_change_from_200_day_moving_average() != None else 0) +
+                    float(
+                        detail.get_price_earnings_growth_ratio() if detail.get_price_earnings_growth_ratio() != None else 0),
+                    stock, detail))
+                if len(quality_sortlst) > 3:
+                    heapq.heappop(quality_sortlst)
+            total_f = 0
+            for item in quality_sortlst:
+                total_f = total_f + item[0]
+            for item in quality_sortlst:
+                item_pct = item[0] / float(total_f*iv_type)
+                item_amt = allotment * item_pct
+                rstlist.append({"sticker": item[1], "name": item[2].get_name(), "aloc_pct": str(item_pct),
+                                "aloc_amt": str(item_amt), "price": str(item[2].get_price()),
+                                "exchange": str(item[2].get_stock_exchange())})
 
+        if 'value' in request.POST.keys():
+            for stock in value_stcklist:
+                while True:
+                    try:
+                        detail = Share(stock)
+                    except:
+                        time.sleep(0.1)
+                        continue
+                    break
+                heapq.heappush(value_sortlst,
+                               (float(detail.get_dividend_yield() if detail.get_dividend_yield() != None else 0) +
+                                float(
+                                    detail.get_price_earnings_growth_ratio() if detail.get_price_earnings_growth_ratio() != None else 0) -
+                                float(detail.get_price_book() if detail.get_price_book() != None else 0), stock,
+                                detail))
+                if len(value_sortlst) > 3:
+                    heapq.heappop(value_sortlst)
+            total_f = 0
+            for item in value_sortlst:
+                total_f = total_f + item[0]
+            for item in value_sortlst:
+                item_pct = item[0] / float(total_f*iv_type)
+                item_amt = allotment * item_pct
+                rstlist.append({"sticker": item[1], "name": item[2].get_name(), "aloc_pct": str(item_pct),
+                                "aloc_amt": str(item_amt), "price": str(item[2].get_price()),
+                                "exchange": str(item[2].get_stock_exchange())})
+        print json.dumps(rstlist)
         return render(request, 'portfolio/home.html', {'result': json.dumps(rstlist)})
     return render(request, 'portfolio/home.html')
