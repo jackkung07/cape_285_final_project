@@ -53,13 +53,52 @@
 
         <div class="content">
             <div class="container-fluid">
-                <div class="canvas holder">
-                    <canvas id="myChart" width="400" height="200"></canvas>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="header"></div>
+                        <div class="content">
+                            <table id="stockTable">
+                            <thead>
+                            <tr>
+                                <th>Sticker</th>
+                                <th>Latest Price</th>
+                                <th>Holding Value</th>
+                                <th>Holding Ratio</th>
+                                <th>Exchange</th>
+                                <th>Company Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            <tr>
+                                <!--<td><p>{{ rst.sticker }}</p></td>-->
+                                <!--<td><p>{{ rst.price }}</p></td>-->
+                                <!--<td><p>{{ rst.aloc_amt }}</p></td>-->
+                                <!--<td><p>{{ rst.aloc_pct }}</p></td>-->
+                                <!--<td><p>{{ rst.exchange }}</p></td>-->
+                                <!--<td><p>{{ rst.name }}</p></td>-->
+                            </tr>
+
+                            </tbody>
+                        </table>
+                        </div>
+                        <div class="footer">
+                        </div>
+                    </div>
                 </div>
-                <div class="footer">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="header"></div>
+                        <div class="content">
+                            <div class="canvas holder">
+                                <canvas id="myChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="footer">
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
         {% include "portfolio/includes/footer.html" %}
     </div>
@@ -74,20 +113,64 @@
 <script language="javascript">
     var result = document.getElementById('resultData').value;
     result = JSON.parse(result);
-    debugger;
-
+//    debugger;
+    var len = result.length;
+    var his = result[len - 1].history;
+    his.reverse();
+    var labels = [];
+    var datas = [];
+    for (var i = 0; i < his.length; i++) {
+        var key = Object.keys(his[i])[0];
+        labels.push(key);
+        var val = his[i][key].toString();
+        datas.push(val);
+    }
     var ctx = document.getElementById("myChart");
     var myLineChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: ['1', '2', '3', '4', '5'],
-        datasets: [
-            {
-                label: "My First dataset",
-                data: ['2','3','4','5','6']
-            }
-        ]
-    }});
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "History",
+                    data: datas
+                }
+            ]
+        }
+    });
+
+    var tableRef = document.getElementById('stockTable').getElementsByTagName('tbody')[0];
+    for (i = 0 ;i < result.length - 1; i++) {
+        // Insert a row in the table at row index 0
+        var newRow = tableRef.insertRow(i);
+        var curVal = result[i];
+
+        // Insert a cell in the row at index 0
+        var newCell = newRow.insertCell(0);
+        // Append a text node to the cell
+        var newText = document.createTextNode(curVal.sticker);
+        newCell.appendChild(newText);
+
+        newCell = newRow.insertCell(1);
+        newText = document.createTextNode(curVal.price);
+        newCell.appendChild(newText);
+
+        newCell = newRow.insertCell(2);
+        newText = document.createTextNode(curVal.aloc_amt);
+        newCell.appendChild(newText);
+
+        newCell = newRow.insertCell(3);
+        newText = document.createTextNode(curVal.aloc_pct);
+        newCell.appendChild(newText);
+
+        newCell = newRow.insertCell(4);
+        newText = document.createTextNode(curVal.exchange);
+        newCell.appendChild(newText);
+
+        newCell = newRow.insertCell(5);
+        newText = document.createTextNode(curVal.name);
+        newCell.appendChild(newText);
+    }
 </script>
 
 

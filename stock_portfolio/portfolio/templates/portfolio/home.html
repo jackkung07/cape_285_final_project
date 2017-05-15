@@ -67,7 +67,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="number" id="allotment" name="allotment" value="1000">
+                                            <input type="number" id="allotment" name="allotment" value="5000">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -174,10 +174,10 @@
             });
             document.investment;
             return false;
-        } else if (allotment <= 0) {
+        } else if (allotment < 5000) {
             bootbox.dialog({
                 title: "Error",
-                message: "Please input a positive number in allotment field",
+                message: "Please input at least 5000 or greater in allotment field",
                 buttons: {
                     "Close": {
                         label: "Close",
