@@ -6,7 +6,7 @@ django-oauth-toolkit==0.11.0
 purl==1.3
 requests==2.13.0
 django-cors-middleware==1.3.1
-mysql-python
-yahoo-finance
+mysql-python==1.2.5
+yahoo-finance==1.4.0
 
 #mysqlclient==1.3.9
