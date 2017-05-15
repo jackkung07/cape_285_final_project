@@ -57,7 +57,7 @@
                     <div class="col-md-12">
                         <div class="header"></div>
                         <div class="content">
-                            <table id="stockTable">
+                            <table id="stockTable" align="center">
                             <thead>
                             <tr>
                                 <th>Sticker</th>
@@ -69,35 +69,53 @@
                             </tr>
                             </thead>
                             <tbody>
-
                             <tr>
-                                <!--<td><p>{{ rst.sticker }}</p></td>-->
-                                <!--<td><p>{{ rst.price }}</p></td>-->
-                                <!--<td><p>{{ rst.aloc_amt }}</p></td>-->
-                                <!--<td><p>{{ rst.aloc_pct }}</p></td>-->
-                                <!--<td><p>{{ rst.exchange }}</p></td>-->
-                                <!--<td><p>{{ rst.name }}</p></td>-->
                             </tr>
-
                             </tbody>
                         </table>
                         </div>
                         <div class="footer">
+                            <hr>
                         </div>
                     </div>
+
+                </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="header"></div>
                         <div class="content">
-                            <div class="canvas holder">
-                                <canvas id="myChart" width="400" height="200"></canvas>
+                            <div id="portfolio_holding_ratio" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>
+                        </div>
+                        <div class="footer">
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="header"></div>
+                        <div class="content">
+                            <div class="canvas holder" width="300" height="200">
+                                <canvas id="myChart"></canvas>
                             </div>
                         </div>
                         <div class="footer">
+                            <hr>
                         </div>
                     </div>
                 </div>
+                <!--<div class="row">-->
+                    <!--<div class="col-md-12">-->
+                        <!--<div class="header"></div>-->
+                        <!--<div class="content">-->
+                            <!--<div class="canvas holder" align="center" width="200" height="150" style="width: 200px; height: 150px">-->
+                                <!--<canvas id="myChart"></canvas>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="footer">-->
+                            <!--<hr>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
             </div>
         </div>
         {% include "portfolio/includes/footer.html" %}
@@ -108,6 +126,8 @@
 {% include "portfolio/includes/requiredscripts.html" %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
 
 <script language="javascript">
@@ -140,6 +160,8 @@
     });
 
     var tableRef = document.getElementById('stockTable').getElementsByTagName('tbody')[0];
+    var pieDatas = [];
+
     for (i = 0 ;i < result.length - 1; i++) {
         // Insert a row in the table at row index 0
         var newRow = tableRef.insertRow(i);
@@ -170,7 +192,43 @@
         newCell = newRow.insertCell(5);
         newText = document.createTextNode(curVal.name);
         newCell.appendChild(newText);
+        if (i === 0) {
+            var pieData = {name: curVal.name, y: parseFloat(curVal.aloc_pct), sliced: true, selected: true};
+        } else {
+            var pieData = {name: curVal.name, y: parseFloat(curVal.aloc_pct)};
+        }
+        pieDatas.push(pieData);
     }
+
+    Highcharts.chart('portfolio_holding_ratio', {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                    text: 'Portfolio Holding Ratio'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: false
+                        },
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    name: 'stock',
+                    colorByPoint: true,
+                    data: pieDatas
+                }]
+            });
 </script>
 
 
