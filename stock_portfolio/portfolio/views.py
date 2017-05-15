@@ -210,7 +210,12 @@ def result_page(request):
         day_pro = list()
         remaining = 0
         for item in rstlist:
-            hist_info = stckdict[item["sticker"]].get_historical(str_date,end_date)
+            while True:
+                try:
+                    hist_info = stckdict[item["sticker"]].get_historical(str_date,end_date)
+                except:
+                    continue
+                break
             for i in range(0,6):
                 if len(day_pro)<=i:
                     day_pro.append({hist_info[i]["Date"]:float(hist_info[i]["Close"])*int(float(item["aloc_amt"])/float(hist_info[i]["Open"]))+float(item["aloc_amt"])%float(hist_info[i]["Open"])})
