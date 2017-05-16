@@ -49,8 +49,11 @@ def result_page(request):
         ori_allotment = allotment
         iv_type = 0
         for key in request.POST.keys():
-            if key in ['ethical','growth','index','quality']:
+            print "iv_type="+str(iv_type)
+            print str(key)
+            if key in ['ethical','growth','index','quality','value']:
                 iv_type = iv_type + 1
+
         print("current selected types count = " + str(iv_type))
         if iv_type == 2:
             allotment = allotment/float(2)
@@ -198,6 +201,7 @@ def result_page(request):
             total_f = 0
             for item in value_sortlst:
                 total_f = total_f + item[0]
+            print "total_f=" + str(total_f)
             for item in value_sortlst:
                 item_pct = item[0] / float(total_f*iv_type)
                 item_amt = allotment * item_pct
